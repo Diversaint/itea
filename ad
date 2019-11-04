@@ -1,0 +1,276 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mnew file mode 100644[m
+[1mindex 0000000..e6ebc35[m
+[1m--- /dev/null[m
+[1m+++ b/.gitignore[m
+[36m@@ -0,0 +1,3 @@[m
+[32m+[m[32m.idea/[m
+[32m+[m[32mtarget/[m
+[32m+[m[32m*.iml[m
+\ No newline at end of file[m
+[1mdiff --git a/pom.xml b/pom.xml[m
+[1mnew file mode 100644[m
+[1mindex 0000000..1c373ca[m
+[1m--- /dev/null[m
+[1m+++ b/pom.xml[m
+[36m@@ -0,0 +1,54 @@[m
+[32m+[m[32m<?xml version="1.0" encoding="UTF-8"?>[m
+[32m+[m[32m<project xmlns="http://maven.apache.org/POM/4.0.0"[m
+[32m+[m[32m         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"[m
+[32m+[m[32m         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">[m
+[32m+[m[32m    <modelVersion>4.0.0</modelVersion>[m
+[32m+[m
+[32m+[m[32m    <groupId>itea</groupId>[m
+[32m+[m[32m    <artifactId>java_advanced_lessons</artifactId>[m
+[32m+[m[32m    <version>${my.version}</version>[m
+[32m+[m[32m    <packaging>pom</packaging>[m
+[32m+[m
+[32m+[m[32m    <properties>[m
+[32m+[m[32m        <my.version>1.0-SNAPSHOT</my.version>[m
+[32m+[m[32m        <junit.version>4.12</junit.version>[m
+[32m+[m[32m        <gson.version>2.8.1</gson.version>[m
+[32m+[m
+[32m+[m[32m    </properties>[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    <dependencies>[m
+[32m+[m[32m    <!-- https://mvnrepository.com/artifact/junit/junit -->[m
+[32m+[m[32m    <dependency>[m
+[32m+[m[32m        <groupId>junit</groupId>[m
+[32m+[m[32m        <artifactId>junit</artifactId>[m
+[32m+[m[32m        <version>${junit.version}</version>[m
+[32m+[m[32m    </dependency>[m
+[32m+[m[32m    <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->[m
+[32m+[m[32m    <dependency>[m
+[32m+[m[32m        <groupId>com.google.code.gson</groupId>[m
+[32m+[m[32m        <artifactId>gson</artifactId>[m
+[32m+[m[32m        <version>${gson.version}</version>[m
+[32m+[m[32m    </dependency>[m
+[32m+[m
+[32m+[m[32m    </dependencies>[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    <build>[m
+[32m+[m
+[32m+[m[32m        <finalName>${project.artifactId}</finalName>[m
+[32m+[m
+[32m+[m[32m        <plugins>[m
+[32m+[m[32m            <plugin>[m
+[32m+[m[32m                <groupId>org.apache.maven.plugins</groupId>[m
+[32m+[m[32m                <artifactId>maven-compiler-plugin</artifactId>[m
+[32m+[m[32m                <configuration>[m
+[32m+[m[32m                    <source>1.8</source>[m
+[32m+[m[32m                    <target>1.8</target>[m
+[32m+[m[32m                </configuration>[m
+[32m+[m[32m            </plugin>[m
+[32m+[m[32m        </plugins>[m
+[32m+[m[32m    </build>[m
+[32m+[m
+[32m+[m
+[32m+[m[32m</project>[m
+\ No newline at end of file[m
+[1mdiff --git a/src/main/java/reflection_annotation/MyField.java b/src/main/java/reflection_annotation/MyField.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..a7c0daf[m
+[1m--- /dev/null[m
+[1m+++ b/src/main/java/reflection_annotation/MyField.java[m
+[36m@@ -0,0 +1,9 @@[m
+[32m+[m[32mpackage reflection_annotation;[m
+[32m+[m
+[32m+[m[32mimport java.lang.annotation.Retention;[m
+[32m+[m[32mimport java.lang.annotation.RetentionPolicy;[m
+[32m+[m
+[32m+[m[32m@Retention(RetentionPolicy.RUNTIME)[m
+[32m+[m[32mpublic @interface MyField {[m
+[32m+[m[32m    String name() default "";[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/main/java/reflection_annotation/ReflectionUtils.java b/src/main/java/reflection_annotation/ReflectionUtils.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..8d4b7e6[m
+[1m--- /dev/null[m
+[1m+++ b/src/main/java/reflection_annotation/ReflectionUtils.java[m
+[36m@@ -0,0 +1,101 @@[m
+[32m+[m[32mpackage reflection_annotation;[m
+[32m+[m
+[32m+[m[32mimport java.lang.reflect.Field;[m
+[32m+[m[32mimport java.lang.reflect.InvocationTargetException;[m
+[32m+[m[32mimport java.lang.reflect.Method;[m
+[32m+[m[32mimport java.util.HashMap;[m
+[32m+[m[32mimport java.util.Map;[m
+[32m+[m[32mimport java.util.regex.Matcher;[m
+[32m+[m[32mimport java.util.regex.Pattern;[m
+[32m+[m
+[32m+[m[32mpublic class ReflectionUtils {[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    // using reflection[m
+[32m+[m[32m    public static String invokeToString(Object target){[m
+[32m+[m[32m        Class targetClass = target.getClass();[m
+[32m+[m[32m        String res = "";[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            Method targetMethodToString = targetClass.getMethod("toString");[m
+[32m+[m[32m            res = (String) targetMethodToString.invoke(target);[m
+[32m+[m[32m        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {[m
+[32m+[m[32m            e.printStackTrace();[m
+[32m+[m[32m        }[m
+[32m+[m[32m        return res;[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m
+[32m+[m
+[32m+[m[32m    /*convert all public fields into json string*/[m
+[32m+[m[32m    public static String convertToJson(Object target){[m
+[32m+[m[32m        StringBuilder res = new StringBuilder();[m
+[32m+[m[32m        res.append("{\n");[m
+[32m+[m[32m        Class classTarget = target.getClass();[m
+[32m+[m[32m        Field[] fields = classTarget.getFields();[m
+[32m+[m[32m        for (Field field : fields){[m
+[32m+[m[32m            try {[m
+[32m+[m[32m                res.append("\"").append(field.getName()).append("\"").append(":");[m
+[32m+[m[32m                String typeOfValue = field.get(target).getClass().toString();[m
+[32m+[m[32m                if (typeOfValue.contains("String"))[m
+[32m+[m[32m                    res.append("\"").append(field.get(target)).append("\"");[m
+[32m+[m[32m                else[m
+[32m+[m[32m                    res.append(field.get(target));[m
+[32m+[m[32m                res.append("\n");[m
+[32m+[m[32m            } catch (IllegalAccessException e) {[m
+[32m+[m[32m                e.printStackTrace();[m
+[32m+[m[32m            }[m
+[32m+[m[32m        }[m
+[32m+[m[32m        return res.append("}").toString();[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    /*convert all fields that were annotated by SpecificAnnotation into json string*/[m
+[32m+[m[32m    public static Object converFromJson(String src, Class cls){[m
+[32m+[m[32m        src = src.substring(3, src.length() - 2);[m
+[32m+[m[32m        String[] lines = src.split("\n");[m
+[32m+[m[32m        Map<String, String> mapFieldValue = new HashMap<>();[m
+[32m+[m[32m        Pattern pattern = Pattern.compile("\"(.+?)\"");[m
+[32m+[m[32m        for (String line : lines){[m
+[32m+[m[32m            String[] strings = line.split(":");[m
+[32m+[m[32m            Matcher matcher0 = pattern.matcher(strings[0]);[m
+[32m+[m[32m            Matcher matcher1 = pattern.matcher(strings[1]);[m
+[32m+[m[32m            matcher0.find();[m
+[32m+[m[32m            if(matcher1.find())[m
+[32m+[m[32m                mapFieldValue.put(matcher0.group(1), matcher1.group(1));[m
+[32m+[m[32m            else[m
+[32m+[m[32m                mapFieldValue.put(matcher0.group(1), strings[1]);[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        try {[m
+[32m+[m[32m            Object res = cls.newInstance();[m
+[32m+[m[32m            Map <String, Field> onlyAnnotationFileds = new HashMap<>();[m
+[32m+[m[32m            for (Field field : cls.getDeclaredFields()) {[m
+[32m+[m[32m                MyField myField = field.getAnnotation(MyField.class);[m
+[32m+[m[32m                if (myField != null)[m
+[32m+[m[32m                    onlyAnnotationFileds.put(field.getName(), field);[m
+[32m+[m[32m            }[m
+[32m+[m
+[32m+[m[32m            for (String fieldName : onlyAnnotationFileds.keySet()){[m
+[32m+[m[32m                Field field = onlyAnnotationFileds.get(fieldName);[m
+[32m+[m[32m                Class<?> fieldType = field.getType();[m
+[32m+[m[32m                String nameCamelCase = "set" + field.getName().substring(0,1).toUpperCase() + fieldName.substring(1);[m
+[32m+[m[32m                Method setMethod = cls.getMethod(nameCamelCase, fieldType);[m
+[32m+[m[32m                if (int.class == fieldType)[m
+[32m+[m[32m                    setMethod.invoke(res, Integer.parseInt(mapFieldValue.get(fieldName)));[m
+[32m+[m[32m                if (double.class == fieldType)[m
+[32m+[m[32m                    setMethod.invoke(res, Double.parseDouble(mapFieldValue.get(fieldName)));[m
+[32m+[m[32m                if (String.class == fieldType)[m
+[32m+[m[32m                    setMethod.invoke(res, mapFieldValue.get(fieldName));[m
+[32m+[m[32m            }[m
+[32m+[m[32m            return res;[m
+[32m+[m
+[32m+[m
+[32m+[m[32m        } catch (InstantiationException | IllegalAccessException |[m
+[32m+[m[32m                NoSuchMethodException | InvocationTargetException e) {[m
+[32m+[m[32m            e.printStackTrace();[m
+[32m+[m[32m        }[m
+[32m+[m[32m        return null;[m
+[32m+[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m}[m
+[1mdiff --git a/src/test/java/reflection_annotation/ReflectionUtilsTest.java b/src/test/java/reflection_annotation/ReflectionUtilsTest.java[m
+[1mnew file mode 100644[m
+[1mindex 0000000..ada7ee5[m
+[1m--- /dev/null[m
+[1m+++ b/src/test/java/reflection_annotation/ReflectionUtilsTest.java[m
+[36m@@ -0,0 +1,76 @@[m
+[32m+[m[32mpackage reflection_annotation;[m
+[32m+[m
+[32m+[m[32mimport org.hamcrest.CoreMatchers;[m
+[32m+[m[32mimport org.junit.Test;[m
+[32m+[m
+[32m+[m[32mimport static org.junit.Assert.*;[m
+[32m+[m
+[32m+[m[32mpublic class ReflectionUtilsTest {[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    public void invokeToString() throws Exception {[m
+[32m+[m[32m        String res = ReflectionUtils.invokeToString(new User("Ivan", 26));[m
+[32m+[m[32m        assertThat(res, CoreMatchers.containsString("Ivan"));[m
+[32m+[m[32m        assertThat(res, CoreMatchers.containsString("26"));[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    public void convertToJson() throws Exception {[m
+[32m+[m[32m        String res = ReflectionUtils.convertToJson(new User("Ivan", 26));[m
+[32m+[m[32m        assertThat(res, CoreMatchers.containsString("Ivan"));[m
+[32m+[m[32m        assertThat(res, CoreMatchers.containsString("26"));[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    public void convertToJson1() throws Exception {[m
+[32m+[m[32m        String target = "{\n" +[m
+[32m+[m[32m                "  \"name\":\"Ivan\",\n" +[m
+[32m+[m[32m                "  \"age\":26\n" +[m
+[32m+[m[32m                "}";[m
+[32m+[m
+[32m+[m[32m        User user = (User) ReflectionUtils.converFromJson(target, User.class);[m
+[32m+[m
+[32m+[m[32m        assertThat(user.name, CoreMatchers.equalTo("Ivan"));[m
+[32m+[m[32m        assertThat(user.age, CoreMatchers.equalTo(26));[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    static class User {[m
+[32m+[m
+[32m+[m[32m        @MyField[m
+[32m+[m[32m        public String name;[m
+[32m+[m[32m        @MyField[m
+[32m+[m[32m        public int age;[m
+[32m+[m
+[32m+[m[32m        public User() {[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public User(String name, int age) {[m
+[32m+[m[32m            this.name = name;[m
+[32m+[m[32m            this.age = age;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public String getName() {[m
+[32m+[m[32m            return name;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public void setName(String name) {[m
+[32m+[m[32m            this.name = name;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public int getAge() {[m
+[32m+[m[32m            return age;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        public void setAge(int age) {[m
+[32m+[m[32m            this.age = age;[m
+[32m+[m[32m        }[m
+[32m+[m
+[32m+[m[32m        @Override[m
+[32m+[m[32m        public String toString() {[m
+[32m+[m[32m            return "User{" +[m
+[32m+[m[32m                    "name='" + name + '\'' +[m
+[32m+[m[32m                    ", age=" + age +[m
+[32m+[m[32m                    '}';[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m}[m
+\ No newline at end of file[m
