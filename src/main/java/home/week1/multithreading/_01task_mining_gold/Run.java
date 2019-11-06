@@ -2,6 +2,7 @@ package home.week1.multithreading._01task_mining_gold;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class Run {
 
@@ -9,6 +10,15 @@ public class Run {
 
         IMine mine = new MineASynch(100);
         List<Thread> minners = new ArrayList<>();
+        String s = "";
+        s += 5;
+        Integer q = new Integer("5");
+        int qq = 5;
+        qq = qq % 3;
+
+
+
+
 
 
         for (int i = 0; i < 5; i++){
