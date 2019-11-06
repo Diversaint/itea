@@ -13,10 +13,11 @@
                 values.add(30);
                 continue;
             }
-            else
+            else {
                 out.write("<h1 style='color:red'>Error! Please enter number of " + parameter + "!</h1>");
-            error = true;
-            break;
+                error = true;
+                break;
+            }
         }
         try{
             values.add(Integer.valueOf(parameterValue));
