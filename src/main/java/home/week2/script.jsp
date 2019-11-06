@@ -50,7 +50,7 @@
                     }
                     resultHtml.append("bgcolor='yellow'");
                 }
-                if (row == column) {
+                if (row == column && values.get(0) > 1 && values.get(1) > 1) {
                     resultHtml.append("bgcolor='blue'");
                 }
 
